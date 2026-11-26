@@ -24,9 +24,15 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     static final double VELOCITY_STEP = 20;
     static final double SLOWEST_SPEED = 0.3;
-    static final double TRIGGER_THRESHOLD = 0.2;
+    /** Right trigger must be pressed past half way, so a resting finger or a worn trigger does nothing. */
+    static final double TRIGGER_THRESHOLD = 0.5;
+    /** Set to false if the intake should only ever run on right bumper / right trigger. */
+    static final boolean INTAKE_HELPS_LAUNCH = true;
 
     private Robot robot;
+    /** True from the first shot until left bumper is released, so the intake does not start and stop. */
+    private boolean launchStarted = false;
+    private String intakeReason = "off";
 
     @Override
     public void runOpMode() {
@@ -90,13 +96,26 @@ public class BioBuzzTeleOp extends LinearOpMode {
     }
 
     private void intakeControls(boolean feedingShot) {
+        // Remember that a launch has begun, and forget it as soon as left bumper is let go.
+        if (!gamepad1.left_bumper || gamepad1.x) {
+            launchStarted = false;
+        } else if (feedingShot) {
+            launchStarted = true;
+        }
+
         if (gamepad1.right_trigger > TRIGGER_THRESHOLD) {
             robot.setIntake(-1);
-        } else if (gamepad1.right_bumper || feedingShot) {
-            // The intake also carries pollen up to the feeder, so run it while launching.
+            intakeReason = "OUT (right trigger)";
+        } else if (gamepad1.right_bumper) {
             robot.setIntake(1);
+            intakeReason = "IN (right bumper)";
+        } else if (INTAKE_HELPS_LAUNCH && launchStarted) {
+            // Carries pollen up to the feeder. Stays on for the whole launch instead of flickering.
+            robot.setIntake(1);
+            intakeReason = "IN (launching)";
         } else {
             robot.setIntake(0);
+            intakeReason = "off";
         }
     }
 
@@ -112,6 +131,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
         telemetry.addData("Flywheel", "%.0f / %.0f ticks/s",
                 robot.getFlywheelVelocity(), robot.getTargetVelocity());
         telemetry.addData("Feeding", feedingShot ? "YES" : "no");
+        // If the intake moves while this says "off", the cause is wiring or configuration, not the code.
+        telemetry.addData("Intake", "%s   power %.2f   trigger %.2f",
+                intakeReason, robot.intake.getPower(), gamepad1.right_trigger);
         telemetry.update();
     }
 }
