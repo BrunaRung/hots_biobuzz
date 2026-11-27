@@ -53,14 +53,17 @@ public class BioBuzzAuto extends LinearOpMode {
         }
         robot.drive(0, 0, 0);
 
-        // 3. Launch. Feed only while the flywheel is at speed.
+        // 3. Launch. Feed only while the flywheel is at speed; once the first shot goes,
+        //    the intake keeps running instead of starting and stopping with every dip.
         stepTime.reset();
+        boolean launchStarted = false;
         while (opModeIsActive()
                 && stepTime.seconds() < LAUNCH_SECONDS
                 && autoTime.seconds() < AUTO_END_SECONDS) {
             boolean ready = robot.spinUpAndCheckReady();
+            launchStarted |= ready;
             robot.setFeeder(ready ? 1 : 0);
-            robot.setIntake(ready ? 1 : 0);
+            robot.setIntake(launchStarted ? 1 : 0);
 
             telemetry.addData("Flywheel", "%.0f / %.0f ticks/s",
                     robot.getFlywheelVelocity(), robot.getTargetVelocity());
