@@ -30,7 +30,7 @@ public class Robot {
     static final DcMotorSimple.Direction LEFT_DRIVE_DIRECTION = DcMotorSimple.Direction.FORWARD;
     static final DcMotorSimple.Direction RIGHT_DRIVE_DIRECTION = DcMotorSimple.Direction.REVERSE;
     static final DcMotorSimple.Direction FLYWHEEL_DIRECTION = DcMotorSimple.Direction.FORWARD;
-    static final DcMotorSimple.Direction INTAKE_DIRECTION = DcMotorSimple.Direction.FORWARD;
+    static final DcMotorSimple.Direction INTAKE_DIRECTION = DcMotorSimple.Direction.REVERSE;   // flipped after testing on the robot
     static final DcMotorSimple.Direction FEEDER_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
     // ---- Tuning. Starting values are the ones REV publishes for this starter bot. ----
